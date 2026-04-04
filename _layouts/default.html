@@ -195,18 +195,6 @@
       box-shadow: 0 8px 32px rgba(0,0,0,0.5);
     }
 
-    .writeup-body pre::before {
-      content: 'david@portfolio:~$';
-      display: block;
-      background: #1c1c1c;
-      border-bottom: 1px solid #2a2a2a;
-      padding: 0.45rem 1.2rem;
-      font-family: 'Courier New', monospace;
-      font-size: 0.72rem;
-      color: var(--accent);
-      letter-spacing: 0.5px;
-    }
-
     .writeup-body pre code {
       display: block;
       background: none;
@@ -284,6 +272,26 @@
     .writeup-body .footnotes a { color: var(--text-dim); }
     .writeup-body .footnotes a:hover { color: var(--accent); }
 
+    /* ── Buttons — matches portfolio .btn ── */
+    .btn {
+      display: inline-block;
+      padding: 0.7rem 1.8rem;
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 600;
+      transition: var(--transition);
+      border: 2px solid transparent;
+      font-family: 'Roboto', sans-serif;
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border-color: var(--border);
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
     /* ── Footer — matches portfolio footer ── */
     footer {
       border-top: 1px solid var(--border);
@@ -310,12 +318,12 @@
 <body>
 
   <nav>
-    <div class="nav-logo"><span>[</span><a href="https://shmilowitz.github.io">Portfolio</a><span>]</span></div>
+    <div class="nav-logo"><span>[</span><a href="https://shmilowitz.github.io/portfolio">Portfolio</a><span>]</span></div>
     <ul class="nav-links">
-      <li><a href="https://shmilowitz.github.io#about">About</a></li>
-      <li><a href="https://shmilowitz.github.io#projects">Projects</a></li>
-      <li><a href="https://shmilowitz.github.io#contact">Contact</a></li>
-      <li><a href="https://github.com/Shmilowitz/writeup_fe-ctf" target="_blank">Source</a></li>
+      <li><a href="https://shmilowitz.github.io/portfolio#about">About</a></li>
+      <li><a href="https://shmilowitz.github.io/portfolio#skills">Skills</a></li>
+      <li><a href="https://shmilowitz.github.io/portfolio#projects">Projects</a></li>
+      <li><a href="https://shmilowitz.github.io/portfolio#contact">Contact</a></li>
     </ul>
   </nav>
 
@@ -327,6 +335,9 @@
       <div>mål:&nbsp;<span>root@printserver</span></div>
       <div>trin:&nbsp;<span>11</span></div>
       <div>status:&nbsp;<span>WIP</span></div>
+    </div>
+    <div style="margin-top:1.75rem">
+      <a href="https://github.com/Shmilowitz/writeup_fe-ctf" target="_blank" class="btn btn-outline">&#10697; View Source on GitHub</a>
     </div>
   </div>
 
