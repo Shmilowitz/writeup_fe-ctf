@@ -3,7 +3,7 @@
 
 ## Resumé
 
-Dette writeup dokumenterer kompromittering af et layered og segmenteret CTF miljø designet af FE Hackerakademiet. Opgaven krævede, at en bred vifte af offensive sikkerhedsteknikker blev kædet sammen på tværs af 11 trin. Angrebet tog udgangspunkt i en unauthenticated position mod en webtjeneste. Herfra blev adgang opnået trin for trin via SQL injection, reverse engineering af et custom PAM-modul, RSA cryptoanalysis, Docker container escape, VXLAN network pivoting og exploitation af en custom password generator baseret på en Linear Congruential Generator (LCG).
+Dette writeup dokumenterer kompromittering af et layered og segmenteret CTF miljø. Opgaven krævede, at en bred vifte af offensive sikkerhedsteknikker blev kædet sammen på tværs af 11 trin. Angrebet tog udgangspunkt i en unauthenticated position mod en webtjeneste. Herfra blev adgang opnået trin for trin via SQL injection, reverse engineering af et custom PAM-modul, RSA cryptoanalysis, Docker container escape, VXLAN network pivoting og exploitation af en custom password generator baseret på en Linear Congruential Generator (LCG).
 
 Jeg nåede ikke at færdiggøre opgaven i sin helhed. I det sidste afsnit identificerede jeg angrebsflader på tre applikationer som jeg ikke nåede at udnytte fuldt ud: out-of-bounds sårbarhed i MIDI synthesizeren `saas`, en potentiel RCE mulighed i den MIPS emulerede `noted` applikation som jeg påbegyndte analyse af via Ghidra, samt en custom-patched V8 JavaScript engine i `wat` der indikerer en bevidst indsat sårbarhed i selve JavaScript fortolkeren. Jeg ser mulige veje frem mod exploitation af alle tre, og det er arbejde jeg vil fortsætte med og lave en endelig Writeup på denne øvelsesoperation.
 
