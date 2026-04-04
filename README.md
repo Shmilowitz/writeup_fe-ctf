@@ -1,6 +1,4 @@
 # Øvelsesoperation Writeup
-**FE Hackerakademiet**
-
 ---
 
 ## Resumé
