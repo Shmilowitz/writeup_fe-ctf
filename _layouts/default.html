@@ -4,25 +4,44 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{{ page.title | default: site.title }}</title>
-  <meta name="theme-color" content="#0a0a0a" />
+  <meta name="theme-color" content="#161616" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* ── Dark mode (default) — softer greys ── */
     :root {
       --accent:     #cc0000;
       --accent-dim: #8b0000;
-      --bg:         #0a0a0a;
-      --bg2:        #111111;
-      --bg3:        #1a1a1a;
+      --bg:         #161616;
+      --bg2:        #1e1e1e;
+      --bg3:        #272727;
       --text:       #e8e8e8;
-      --text-dim:   #888;
-      --border:     #222;
+      --text-dim:   #a8a8a8;
+      --border:     #2e2e2e;
+      --nav-bg:     rgba(22,22,22,0.95);
+      --pre-bg:     #111111;
+      --pre-border: #333333;
+      --pre-text:   #c8c8c8;
       --nav-h:      64px;
       --side-bar:   6px;
       --radius:     4px;
       --transition: 0.3s ease;
+    }
+
+    /* ── Light mode — exact match to portfolio ── */
+    html[data-theme="light"] {
+      --bg:        #f4f4f4;
+      --bg2:       #eaeaea;
+      --bg3:       #dedede;
+      --text:      #111111;
+      --text-dim:  #555555;
+      --border:    #cccccc;
+      --nav-bg:    rgba(244,244,244,0.95);
+      --pre-bg:    #1a1a1a;
+      --pre-border:#333333;
+      --pre-text:  #c8c8c8;
     }
 
     html { scroll-behavior: smooth; }
@@ -36,6 +55,7 @@
       border-right: var(--side-bar) solid var(--accent);
       min-height: 100vh;
       overflow-x: hidden;
+      transition: background var(--transition), color var(--transition);
     }
 
     a { color: var(--accent); text-decoration: none; transition: color var(--transition); }
@@ -46,12 +66,12 @@
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
 
-    /* ── Nav — exact match to portfolio ── */
+    /* ── Nav ── */
     nav {
       position: fixed;
       top: 0; left: var(--side-bar); right: var(--side-bar);
       height: var(--nav-h);
-      background: rgba(10,10,10,0.95);
+      background: var(--nav-bg);
       backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--border);
       display: flex;
@@ -63,7 +83,7 @@
 
     .nav-logo { font-size: 1.2rem; font-weight: 700; color: var(--text); letter-spacing: 2px; text-transform: uppercase; }
     .nav-logo span { color: var(--accent); }
-    .nav-logo a { color: var(--text); }
+    .nav-logo a { color: var(--text); transition: color var(--transition); }
     .nav-logo a:hover { color: var(--accent); }
 
     .nav-links { display: flex; gap: 0.25rem; list-style: none; }
@@ -83,7 +103,28 @@
     .nav-links a::before { content: '> '; color: var(--accent); opacity: 0; font-size: 0.7rem; transition: opacity var(--transition); }
     .nav-links a:hover { background: rgba(204,0,0,0.06); border-color: rgba(204,0,0,0.2); }
     .nav-links a:hover::before { opacity: 1; }
-    .nav-links a.active { color: var(--accent); background: rgba(204,0,0,0.08); border-color: rgba(204,0,0,0.25); }
+
+    /* ── Theme toggle — exact match to portfolio .theme-toggle ── */
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-dim);
+      cursor: pointer;
+      width: 36px; height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: border-color var(--transition), color var(--transition), background var(--transition);
+      flex-shrink: 0;
+      margin-left: 0.5rem;
+    }
+    .theme-toggle:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(204,0,0,0.08);
+    }
 
     /* ── Hero ── */
     .writeup-hero {
@@ -108,6 +149,7 @@
       font-weight: 700;
       line-height: 1.1;
       margin-bottom: 1rem;
+      color: var(--text);
     }
 
     .section-line { width: 48px; height: 3px; background: var(--accent); margin-bottom: 1.5rem; }
@@ -122,6 +164,26 @@
     }
     .hero-meta span { color: var(--accent); }
 
+    /* ── Buttons ── */
+    .btn {
+      display: inline-block;
+      padding: 0.7rem 1.8rem;
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 600;
+      transition: var(--transition);
+      border: 2px solid transparent;
+      font-family: 'Roboto', sans-serif;
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border-color: var(--border);
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
     /* ── Content ── */
     .writeup-body {
       max-width: 900px;
@@ -129,7 +191,6 @@
       padding: 3rem 2rem 6rem;
     }
 
-    /* Hide duplicate title Jekyll renders from # heading */
     .writeup-body > h1:first-child,
     .writeup-body > h1:first-child + p,
     .writeup-body > h1:first-child + p + hr { display: none; }
@@ -174,33 +235,32 @@
     .writeup-body p { color: var(--text-dim); margin-bottom: 1rem; font-size: 0.95rem; }
     .writeup-body strong { color: var(--text); }
 
-    /* ── Code blocks — terminal style ── */
+    /* ── Inline code ── */
     .writeup-body code {
       font-family: 'Courier New', monospace;
       font-size: 0.82em;
       background: var(--bg3);
-      color: #ff6b6b;
+      color: #e06060;
       padding: 2px 6px;
       border-radius: 2px;
       border: 1px solid var(--border);
     }
 
+    /* ── Code blocks — always dark, readable in both modes ── */
     .writeup-body pre {
-      background: #0d0d0d;
-      border: 1px solid #2a2a2a;
+      background: var(--pre-bg);
+      border: 1px solid var(--pre-border);
       border-left: 3px solid var(--accent);
       border-radius: 0 var(--radius) var(--radius) 0;
-      overflow: hidden;
+      overflow-x: auto;
       margin: 0.75rem 0 1.5rem;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
     }
-
     .writeup-body pre code {
       display: block;
       background: none;
       border: none;
       padding: 1rem 1.2rem;
-      color: #bbb;
+      color: var(--pre-text);
       font-size: 0.82rem;
       line-height: 1.65;
     }
@@ -220,7 +280,6 @@
     .writeup-body ul, .writeup-body ol { margin: 0.5rem 0 1rem 1.5rem; color: var(--text-dim); font-size: 0.95rem; }
     .writeup-body li { margin-bottom: 0.3rem; }
 
-    /* ToC ordered list — styled as nav block */
     .writeup-body > ol {
       background: var(--bg2);
       border: 1px solid var(--border);
@@ -234,7 +293,7 @@
     .writeup-body > ol li a { color: var(--text-dim); }
     .writeup-body > ol li a:hover { color: var(--accent); }
 
-    /* Skill/competence tags — matches .skill-tag */
+    /* Skill tags */
     .writeup-body h3 + ul { margin-left: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem; }
     .writeup-body h3 + ul li {
       padding: 0.25rem 0.65rem;
@@ -248,7 +307,7 @@
     }
     .writeup-body h3 + ul li:hover { border-color: var(--accent); color: var(--text); }
 
-    /* ── Images — matches project card hover ── */
+    /* ── Images ── */
     .writeup-body img {
       border: 1px solid var(--border);
       border-radius: var(--radius);
@@ -272,27 +331,7 @@
     .writeup-body .footnotes a { color: var(--text-dim); }
     .writeup-body .footnotes a:hover { color: var(--accent); }
 
-    /* ── Buttons — matches portfolio .btn ── */
-    .btn {
-      display: inline-block;
-      padding: 0.7rem 1.8rem;
-      border-radius: var(--radius);
-      font-size: 0.85rem;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      font-weight: 600;
-      transition: var(--transition);
-      border: 2px solid transparent;
-      font-family: 'Roboto', sans-serif;
-    }
-    .btn-outline {
-      background: transparent;
-      color: var(--text);
-      border-color: var(--border);
-    }
-    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
-
-    /* ── Footer — matches portfolio footer ── */
+    /* ── Footer ── */
     footer {
       border-top: 1px solid var(--border);
       padding: 2rem;
@@ -304,7 +343,7 @@
     footer a { color: var(--text-dim); }
     footer a:hover { color: var(--accent); }
 
-    /* ── Scroll reveal — matches portfolio .reveal ── */
+    /* ── Scroll reveal ── */
     .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
     .reveal.visible { opacity: 1; transform: translateY(0); }
 
@@ -325,10 +364,11 @@
       <li><a href="https://shmilowitz.github.io/portfolio#projects">Projects</a></li>
       <li><a href="https://shmilowitz.github.io/portfolio#contact">Contact</a></li>
     </ul>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode">☀️</button>
   </nav>
 
   <div class="writeup-hero">
-    <p class="section-title">writeup / David Shmilowitz</p>
+    <p class="section-title">writeup</p>
     <h1 class="hero-name">Øvelsesoperation</h1>
     <div class="section-line"></div>
     <div class="hero-meta">
@@ -351,7 +391,32 @@
   </footer>
 
   <script>
-    // Scroll reveal — mirrors portfolio script.js
+    // ── Theme toggle — mirrors portfolio script.js exactly ──
+    const toggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+
+    function applyTheme(theme) {
+      if (theme === 'light') {
+        html.setAttribute('data-theme', 'light');
+        toggle.textContent = '🌙';
+      } else {
+        html.removeAttribute('data-theme');
+        toggle.textContent = '☀️';
+      }
+    }
+
+    // On load, read from localStorage (syncs with portfolio)
+    const saved = localStorage.getItem('theme') || 'dark';
+    applyTheme(saved);
+
+    toggle.addEventListener('click', () => {
+      const current = html.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+      const next = current === 'light' ? 'dark' : 'light';
+      localStorage.setItem('theme', next);
+      applyTheme(next);
+    });
+
+    // ── Scroll reveal ──
     const els = document.querySelectorAll('.writeup-body > *');
     els.forEach(el => el.classList.add('reveal'));
     const io = new IntersectionObserver(entries => {
