@@ -3,427 +3,511 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{{ page.title | default: site.title }}</title>
-  <meta name="theme-color" content="#161616" />
+  <title>{{ page.title | default: site.title | default: "CTF Writeup" }}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
   <style>
+    /* ─── RESET & BASE ─────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* ── Dark mode (default) — softer greys ── */
     :root {
-      --accent:     #cc0000;
-      --accent-dim: #8b0000;
-      --bg:         #161616;
-      --bg2:        #1e1e1e;
-      --bg3:        #272727;
-      --text:       #e8e8e8;
-      --text-dim:   #a8a8a8;
-      --border:     #2e2e2e;
-      --nav-bg:     rgba(22,22,22,0.95);
-      --pre-bg:     #111111;
-      --pre-border: #333333;
-      --pre-text:   #c8c8c8;
-      --nav-h:      64px;
-      --side-bar:   6px;
-      --radius:     4px;
-      --transition: 0.3s ease;
-    }
-
-    /* ── Light mode — exact match to portfolio ── */
-    html[data-theme="light"] {
-      --bg:        #f4f4f4;
-      --bg2:       #eaeaea;
-      --bg3:       #dedede;
-      --text:      #111111;
-      --text-dim:  #555555;
-      --border:    #cccccc;
-      --nav-bg:    rgba(244,244,244,0.95);
-      --pre-bg:    #1a1a1a;
-      --pre-border:#333333;
-      --pre-text:  #c8c8c8;
+      --red:      #e53935;
+      --red-dim:  #9b1a1a;
+      --bg:       #0c0c0c;
+      --bg2:      #111111;
+      --bg3:      #181818;
+      --border:   #222222;
+      --text:     #d4d4d4;
+      --text-dim: #787878;
+      --white:    #f0f0f0;
+      --green:    #4caf50;
+      --yellow:   #ffd54f;
+      --nav-h:    64px;
     }
 
     html { scroll-behavior: smooth; }
 
     body {
-      font-family: 'Roboto', 'Segoe UI', sans-serif;
       background: var(--bg);
       color: var(--text);
-      line-height: 1.7;
-      border-left:  var(--side-bar) solid var(--accent);
-      border-right: var(--side-bar) solid var(--accent);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      line-height: 1.75;
       min-height: 100vh;
-      overflow-x: hidden;
-      transition: background var(--transition), color var(--transition);
     }
 
-    a { color: var(--accent); text-decoration: none; transition: color var(--transition); }
-    a:hover { color: #ff3333; }
-    img { max-width: 100%; display: block; }
+    /* ─── SCANLINE TEXTURE ─────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
 
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
-
-    /* ── Nav ── */
+    /* ─── NAVBAR ───────────────────────────────────── */
     nav {
       position: fixed;
-      top: 0; left: var(--side-bar); right: var(--side-bar);
+      top: 0; left: 0; right: 0;
       height: var(--nav-h);
-      background: var(--nav-bg);
-      backdrop-filter: blur(10px);
+      background: rgba(12,12,12,0.96);
       border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(8px);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 2rem;
+      padding: 0 40px;
       z-index: 1000;
     }
 
-    .nav-logo { font-size: 1.2rem; font-weight: 700; color: var(--text); letter-spacing: 2px; text-transform: uppercase; }
-    .nav-logo span { color: var(--accent); }
-    .nav-logo a { color: var(--text); transition: color var(--transition); }
-    .nav-logo a:hover { color: var(--accent); }
-
-    .nav-links { display: flex; gap: 0.25rem; list-style: none; }
-    .nav-links a {
-      color: var(--text);
-      font-size: 0.78rem;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      font-family: 'Courier New', monospace;
-      font-weight: 600;
-      position: relative;
-      padding: 0.35rem 0.75rem;
-      border-radius: 3px;
-      border: 1px solid transparent;
-      transition: color var(--transition), background var(--transition), border-color var(--transition);
+    .nav-brand {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 14px;
+      letter-spacing: 0.05em;
+      color: var(--white);
+      text-decoration: none;
+      user-select: none;
     }
-    .nav-links a::before { content: '> '; color: var(--accent); opacity: 0; font-size: 0.7rem; transition: opacity var(--transition); }
-    .nav-links a:hover { background: rgba(204,0,0,0.06); border-color: rgba(204,0,0,0.2); }
-    .nav-links a:hover::before { opacity: 1; }
+    .nav-brand .bracket { color: var(--red); }
 
-    /* ── Theme toggle — exact match to portfolio .theme-toggle ── */
-    .theme-toggle {
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      color: var(--text-dim);
-      cursor: pointer;
-      width: 36px; height: 36px;
+    .nav-links {
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      transition: border-color var(--transition), color var(--transition), background var(--transition);
-      flex-shrink: 0;
-      margin-left: 0.5rem;
-    }
-    .theme-toggle:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: rgba(204,0,0,0.08);
+      gap: 32px;
+      list-style: none;
     }
 
-    /* ── Hero ── */
-    .writeup-hero {
-      max-width: 900px;
+    .nav-links a {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--white); }
+    .nav-links a.back-link {
+      color: var(--red-dim);
+      border-left: 1px solid var(--border);
+      padding-left: 32px;
+    }
+    .nav-links a.back-link:hover { color: var(--red); }
+    .nav-links a.back-link::before { content: '← '; }
+
+    /* ─── HERO ─────────────────────────────────────── */
+    .hero {
+      margin-top: var(--nav-h);
+      padding: 72px 40px 56px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 40%;
+      height: 100%;
+      background: radial-gradient(ellipse at 80% 50%, rgba(229,57,53,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      color: var(--red);
+      letter-spacing: 0.1em;
+      margin-bottom: 16px;
+    }
+    .hero-eyebrow::before { content: '→ '; }
+
+    .hero h1 {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: clamp(36px, 5vw, 64px);
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--white);
+      max-width: 800px;
+    }
+    .hero h1 span { color: var(--red); }
+
+    .hero-meta {
+      margin-top: 20px;
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .meta-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      letter-spacing: 0.05em;
+    }
+    .meta-tag .label { color: var(--red); }
+
+    /* ─── LAYOUT ───────────────────────────────────── */
+    .page-wrapper {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: calc(100vh - var(--nav-h));
+      max-width: 1400px;
       margin: 0 auto;
-      padding: calc(var(--nav-h) + 4rem) 2rem 2.5rem;
+    }
+
+    /* ─── SIDEBAR ──────────────────────────────────── */
+    .sidebar {
+      position: sticky;
+      top: var(--nav-h);
+      height: calc(100vh - var(--nav-h));
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+      padding: 40px 24px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    .sidebar-title {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      color: var(--red);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .toc-list {
+      list-style: none;
+    }
+
+    .toc-list li { border-left: 2px solid var(--border); }
+    .toc-list li:hover { border-left-color: var(--red); }
+
+    .toc-list a {
+      display: block;
+      padding: 6px 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      color: var(--text-dim);
+      text-decoration: none;
+      line-height: 1.4;
+      transition: color 0.15s;
+    }
+    .toc-list a:hover { color: var(--white); }
+
+    .toc-list .toc-step {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      color: var(--red);
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    /* ─── MAIN CONTENT ─────────────────────────────── */
+    .content {
+      padding: 56px 64px;
+      max-width: 900px;
+    }
+
+    /* ─── TYPOGRAPHY ───────────────────────────────── */
+    .content h2 {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--white);
+      margin: 56px 0 20px;
+      padding-top: 56px;
+      border-top: 1px solid var(--border);
+      letter-spacing: 0.02em;
+    }
+    .content h2:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+
+    .content h2::before {
+      content: '//';
+      color: var(--red);
+      margin-right: 10px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 18px;
+    }
+
+    .content h3 {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--white);
+      margin: 32px 0 12px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .content h3::before {
+      content: '> ';
+      color: var(--red);
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    .content p {
+      margin-bottom: 16px;
+      color: var(--text);
+      max-width: 72ch;
+    }
+
+    .content a {
+      color: var(--red);
+      text-decoration: none;
+      border-bottom: 1px solid var(--red-dim);
+      transition: border-color 0.15s;
+    }
+    .content a:hover { border-color: var(--red); }
+
+    /* ─── CODE BLOCKS ──────────────────────────────── */
+    .content pre {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--red);
+      padding: 20px 24px;
+      margin: 20px 0;
+      overflow-x: auto;
+      position: relative;
+    }
+
+    .content pre::before {
+      content: 'TERMINAL';
+      position: absolute;
+      top: 0; right: 0;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      color: var(--red);
+      background: var(--bg3);
+      padding: 3px 8px;
+      border-left: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
     }
 
-    .section-title {
-      font-size: 0.75rem;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 0.5rem;
-      font-family: 'Courier New', monospace;
-    }
-    .section-title::before { content: '> '; opacity: 0.5; }
-
-    .hero-name {
-      font-size: clamp(2.2rem, 5vw, 3.8rem);
-      font-weight: 700;
-      line-height: 1.1;
-      margin-bottom: 1rem;
-      color: var(--text);
+    .content code {
+      font-family: 'JetBrains Mono', 'Share Tech Mono', monospace;
+      font-size: 13px;
+      color: #e0e0e0;
+      line-height: 1.6;
     }
 
-    .section-line { width: 48px; height: 3px; background: var(--accent); margin-bottom: 1.5rem; }
-
-    .hero-meta {
-      display: flex;
-      gap: 2rem;
-      flex-wrap: wrap;
-      font-family: 'Courier New', monospace;
-      font-size: 0.8rem;
-      color: var(--text-dim);
-    }
-    .hero-meta span { color: var(--accent); }
-
-    /* ── Buttons ── */
-    .btn {
-      display: inline-block;
-      padding: 0.7rem 1.8rem;
-      border-radius: var(--radius);
-      font-size: 0.85rem;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      font-weight: 600;
-      transition: var(--transition);
-      border: 2px solid transparent;
-      font-family: 'Roboto', sans-serif;
-    }
-    .btn-outline {
-      background: transparent;
-      color: var(--text);
-      border-color: var(--border);
-    }
-    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
-
-    /* ── Content ── */
-    .writeup-body {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 3rem 2rem 6rem;
-    }
-
-    .writeup-body > h1:first-child,
-    .writeup-body > h1:first-child + p,
-    .writeup-body > h1:first-child + p + hr { display: none; }
-
-    .writeup-body h1 {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: var(--text);
-      margin: 3.5rem 0 0.75rem;
-    }
-
-    .writeup-body h2 {
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: var(--text);
-      margin: 2.25rem 0 0.75rem;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
-    .writeup-body h2::before {
-      content: '';
-      display: inline-block;
-      width: 3px;
-      height: 1em;
-      background: var(--accent);
-      border-radius: 1px;
-      flex-shrink: 0;
-    }
-
-    .writeup-body h3 {
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--accent);
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      font-family: 'Courier New', monospace;
-      margin: 1.75rem 0 0.6rem;
-    }
-    .writeup-body h3::before { content: '// '; opacity: 0.35; }
-
-    .writeup-body p { color: var(--text-dim); margin-bottom: 1rem; font-size: 0.95rem; }
-    .writeup-body strong { color: var(--text); }
-
-    /* ── Inline code ── */
-    .writeup-body code {
-      font-family: 'Courier New', monospace;
-      font-size: 0.82em;
+    .content p code, .content li code {
       background: var(--bg3);
-      color: #e06060;
-      padding: 2px 6px;
-      border-radius: 2px;
       border: 1px solid var(--border);
+      padding: 1px 6px;
+      color: var(--red);
+      font-size: 12px;
     }
 
-    /* ── Code blocks — always dark, readable in both modes ── */
-    .writeup-body pre {
-      background: var(--pre-bg);
-      border: 1px solid var(--pre-border);
-      border-left: 3px solid var(--accent);
-      border-radius: 0 var(--radius) var(--radius) 0;
-      overflow-x: auto;
-      margin: 0.75rem 0 1.5rem;
+    /* ─── BLOCKQUOTE ───────────────────────────────── */
+    .content blockquote {
+      border-left: 3px solid var(--red);
+      background: var(--bg3);
+      padding: 16px 20px;
+      margin: 20px 0;
+      color: var(--text-dim);
+      font-style: italic;
     }
-    .writeup-body pre code {
+    .content blockquote strong { color: var(--red); font-style: normal; }
+
+    /* ─── LISTS ────────────────────────────────────── */
+    .content ul, .content ol {
+      padding-left: 24px;
+      margin: 12px 0 20px;
+    }
+
+    .content ul { list-style: none; padding-left: 0; }
+    .content ul li {
+      padding: 3px 0 3px 20px;
+      position: relative;
+      color: var(--text);
+    }
+    .content ul li::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: var(--red);
+      font-size: 10px;
+      top: 7px;
+    }
+
+    .content ol li { color: var(--text); padding: 2px 0; }
+
+    /* Nested lists for skills section */
+    .content ul ul {
+      margin: 4px 0 4px 16px;
+    }
+    .content ul ul li::before { content: '·'; top: 5px; font-size: 14px; }
+
+    /* ─── IMAGES ───────────────────────────────────── */
+    .content img {
+      max-width: 100%;
+      border: 1px solid var(--border);
       display: block;
-      background: none;
-      border: none;
-      padding: 1rem 1.2rem;
-      color: var(--pre-text);
-      font-size: 0.82rem;
-      line-height: 1.65;
+      margin: 20px 0;
     }
 
-    /* ── Blockquote ── */
-    .writeup-body blockquote {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-left: 3px solid var(--accent);
-      border-radius: 0 var(--radius) var(--radius) 0;
-      padding: 0.9rem 1.25rem;
-      margin: 1rem 0 1.25rem;
-    }
-    .writeup-body blockquote p { margin: 0; color: var(--text); font-size: 0.9rem; }
-
-    /* ── Lists ── */
-    .writeup-body ul, .writeup-body ol { margin: 0.5rem 0 1rem 1.5rem; color: var(--text-dim); font-size: 0.95rem; }
-    .writeup-body li { margin-bottom: 0.3rem; }
-
-    .writeup-body > ol {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-left: 3px solid var(--accent);
-      border-radius: 0 var(--radius) var(--radius) 0;
-      padding: 1rem 1rem 1rem 2.5rem;
-      margin: 0 0 2rem;
-      list-style: decimal;
-    }
-    .writeup-body > ol li { font-family: 'Courier New', monospace; font-size: 0.82rem; margin-bottom: 0.2rem; }
-    .writeup-body > ol li a { color: var(--text-dim); }
-    .writeup-body > ol li a:hover { color: var(--accent); }
-
-    /* Skill tags */
-    .writeup-body h3 + ul { margin-left: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem; }
-    .writeup-body h3 + ul li {
-      padding: 0.25rem 0.65rem;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 2px;
-      font-size: 0.75rem;
+    .content img + em, .content a + em {
+      display: block;
+      font-size: 12px;
       color: var(--text-dim);
-      font-family: 'Courier New', monospace;
-      transition: var(--transition);
+      font-style: normal;
+      font-family: 'Share Tech Mono', monospace;
+      margin-top: -12px;
+      margin-bottom: 20px;
     }
-    .writeup-body h3 + ul li:hover { border-color: var(--accent); color: var(--text); }
 
-    /* ── Images ── */
-    .writeup-body img {
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      margin: 1rem 0;
-      transition: border-color var(--transition);
-    }
-    .writeup-body img:hover { border-color: var(--accent); }
-
-    /* ── HR ── */
-    .writeup-body hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
-
-    /* ── Footnotes ── */
-    .writeup-body .footnotes {
-      margin-top: 3rem;
-      padding-top: 1.5rem;
+    /* ─── HR ───────────────────────────────────────── */
+    .content hr {
+      border: none;
       border-top: 1px solid var(--border);
-      font-size: 0.78rem;
-      font-family: 'Courier New', monospace;
+      margin: 48px 0;
     }
-    .writeup-body .footnotes ol { color: var(--text-dim); font-size: 0.8rem; }
-    .writeup-body .footnotes a { color: var(--text-dim); }
-    .writeup-body .footnotes a:hover { color: var(--accent); }
 
-    /* ── Footer ── */
+    /* ─── FOOTNOTES ────────────────────────────────── */
+    .content .footnotes {
+      margin-top: 64px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .content .footnotes ol {
+      font-size: 12px;
+    }
+    .content .footnotes li {
+      color: var(--text-dim);
+      font-family: 'Share Tech Mono', monospace;
+      margin-bottom: 4px;
+    }
+
+    /* ─── TABLE OF CONTENTS (inline) ──────────────── */
+    .content ol:has(li a[href^="#"]) {
+      padding-left: 0;
+      list-style: none;
+      counter-reset: toc-counter;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      padding: 24px 28px;
+      margin: 24px 0;
+    }
+
+    /* ─── STRONG ───────────────────────────────────── */
+    .content strong { color: var(--white); font-weight: 600; }
+
+    /* ─── FOOTER ───────────────────────────────────── */
     footer {
       border-top: 1px solid var(--border);
-      padding: 2rem;
-      text-align: center;
-      font-size: 0.8rem;
+      padding: 24px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
       color: var(--text-dim);
     }
-    footer span { color: var(--accent); }
-    footer a { color: var(--text-dim); }
-    footer a:hover { color: var(--accent); }
+    footer span { color: var(--red); }
 
-    /* ── Scroll reveal ── */
-    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
-    .reveal.visible { opacity: 1; transform: translateY(0); }
+    /* ─── SCROLLBAR ─────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); }
+    ::-webkit-scrollbar-thumb:hover { background: #333; }
 
-    @media (max-width: 640px) {
-      .nav-links { display: none; }
-      .writeup-hero { padding: calc(var(--nav-h) + 2rem) 1.2rem 2rem; }
-      .writeup-body { padding: 2rem 1.2rem 4rem; }
+    /* ─── RESPONSIVE ────────────────────────────────── */
+    @media (max-width: 900px) {
+      .page-wrapper { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .content { padding: 32px 24px; }
+      nav { padding: 0 20px; }
+      .nav-links { gap: 16px; }
+      .nav-links a.back-link { padding-left: 16px; }
+      .hero { padding: 48px 24px 40px; }
     }
   </style>
 </head>
 <body>
 
+  <!-- ── NAVBAR ─────────────────────────────── -->
   <nav>
-    <div class="nav-logo"><span>[</span><a href="https://shmilowitz.github.io/portfolio">Portfolio</a><span>]</span></div>
+    <a href="#" class="nav-brand">
+      <span class="bracket">[</span>WRITEUP<span class="bracket">]</span>
+    </a>
     <ul class="nav-links">
-      <li><a href="https://shmilowitz.github.io/portfolio#about">About</a></li>
-      <li><a href="https://shmilowitz.github.io/portfolio#skills">Skills</a></li>
-      <li><a href="https://shmilowitz.github.io/portfolio#projects">Projects</a></li>
-      <li><a href="https://shmilowitz.github.io/portfolio#contact">Contact</a></li>
+      <li><a href="#resumé">Resumé</a></li>
+      <li><a href="#kompetencer">Kompetencer</a></li>
+      <li><a href="#walkthrough">Walkthrough</a></li>
+      <li><a href="#wip">WIP</a></li>
+      <li><a href="#læring">Læring</a></li>
+      <li><a href="https://shmilowitz.github.io/portfolio" class="back-link">Portfolio</a></li>
     </ul>
-    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode">☀️</button>
   </nav>
 
-  <div class="writeup-hero">
-    <p class="section-title">writeup</p>
-    <h1 class="hero-name">Øvelsesoperation</h1>
-    <div class="section-line"></div>
+  <!-- ── HERO ───────────────────────────────── -->
+  <header class="hero">
+    <p class="hero-eyebrow">CTF // FE Hackerakademiet</p>
+    <h1>Øvelsesoperation<br /><span>Writeup</span></h1>
     <div class="hero-meta">
-      <div>mål:&nbsp;<span>root@printserver</span></div>
-      <div>trin:&nbsp;<span>11</span></div>
-      <div>status:&nbsp;<span>WIP</span></div>
+      <span class="meta-tag"><span class="label">MÅL:</span> root@printserver</span>
+      <span class="meta-tag"><span class="label">TRIN:</span> 11</span>
+      <span class="meta-tag"><span class="label">AUTOR:</span> David Shmilowitz</span>
+      <span class="meta-tag"><span class="label">STATUS:</span> WIP — trin 11 ufærdig</span>
     </div>
-    <div style="margin-top:1.75rem">
-      <a href="https://github.com/Shmilowitz/writeup_fe-ctf" target="_blank" class="btn btn-outline">&#10697; View Source on GitHub</a>
-    </div>
-  </div>
+  </header>
 
-  <div class="writeup-body">
-    {{ content }}
+  <!-- ── BODY ───────────────────────────────── -->
+  <div class="page-wrapper">
+
+    <!-- sidebar ToC -->
+    <aside class="sidebar">
+      <p class="sidebar-title">Indholdsfortegnelse</p>
+      <ul class="toc-list">
+        <li><a href="#resumé">Resumé</a></li>
+        <li><a href="#kompetencer">Kompetencer</a></li>
+        <li>
+          <a href="#walkthrough"><span class="toc-step">TRIN 1–11</span>Walkthrough</a>
+        </li>
+        <li><a href="#trin-1-reconnaissance"><span class="toc-step">01</span>Reconnaissance</a></li>
+        <li><a href="#trin-2-web-exploitation-sql-injection"><span class="toc-step">02</span>SQL Injection</a></li>
+        <li><a href="#trin-3-ssh-adgang"><span class="toc-step">03</span>SSH Adgang</a></li>
+        <li><a href="#trin-4-analyse-af-custom-pam-modul"><span class="toc-step">04</span>PAM Analyse</a></li>
+        <li><a href="#trin-5-lateral-movement-til-pamela-brugeren"><span class="toc-step">05</span>Lateral Movement</a></li>
+        <li><a href="#trin-6-privilege-escalation-i-container"><span class="toc-step">06</span>Privilege Escalation</a></li>
+        <li><a href="#trin-7-rsa-kryptoanalyse--fermats-factorization"><span class="toc-step">07</span>RSA Kryptoanalyse</a></li>
+        <li><a href="#trin-8-forfalskede-docker-tls-certifikater-og-host-escape"><span class="toc-step">08</span>Docker TLS Escape</a></li>
+        <li><a href="#trin-9-network-pivoting-via-vxlan-og-ssh-proxyjump"><span class="toc-step">09</span>VXLAN Pivoting</a></li>
+        <li><a href="#trin-10-analyse-af-lcg-password-generator"><span class="toc-step">10</span>LCG Generator</a></li>
+        <li><a href="#trin-11-printserver-adgang-og-yderligere-discovery"><span class="toc-step">11</span>Printserver</a></li>
+        <li><a href="#wip-analyse-af-angrebsflader-på-router-applikationer"><span class="toc-step">WIP</span>Router Apps</a></li>
+        <li><a href="#læringspunkter">Læringspunkter</a></li>
+      </ul>
+    </aside>
+
+    <!-- main writeup content -->
+    <main class="content">
+      {{ content }}
+    </main>
+
   </div>
 
   <footer>
-    <p>Built with <span>&#10084;</span> by David &mdash; <span>&copy; 2026</span></p>
-    <p style="margin-top:0.4rem;font-size:0.72rem;opacity:0.5">Think like an attacker. Defend like a professional.</p>
+    <span>[WRITEUP]</span> David Shmilowitz — FE Hackerakademiet CTF
+    <a href="https://github.com/Shmilowitz/writeup_fe-ctf" style="color:var(--text-dim);text-decoration:none;border:none;">github.com/Shmilowitz/writeup_fe-ctf</a>
   </footer>
-
-  <script>
-    // ── Theme toggle — mirrors portfolio script.js exactly ──
-    const toggle = document.getElementById('themeToggle');
-    const html = document.documentElement;
-
-    function applyTheme(theme) {
-      if (theme === 'light') {
-        html.setAttribute('data-theme', 'light');
-        toggle.textContent = '🌙';
-      } else {
-        html.removeAttribute('data-theme');
-        toggle.textContent = '☀️';
-      }
-    }
-
-    // On load, read from localStorage (syncs with portfolio)
-    const saved = localStorage.getItem('theme') || 'dark';
-    applyTheme(saved);
-
-    toggle.addEventListener('click', () => {
-      const current = html.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
-      const next = current === 'light' ? 'dark' : 'light';
-      localStorage.setItem('theme', next);
-      applyTheme(next);
-    });
-
-    // ── Scroll reveal ──
-    const els = document.querySelectorAll('.writeup-body > *');
-    els.forEach(el => el.classList.add('reveal'));
-    const io = new IntersectionObserver(entries => {
-      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
-    }, { threshold: 0.06 });
-    els.forEach(el => io.observe(el));
-  </script>
 
 </body>
 </html>
