@@ -67,7 +67,11 @@ Jeg nåede ikke at færdiggøre opgaven i sin helhed. I det sidste afsnit identi
 
 ---
 
+<br>
+
 ## Indholdsfortegnelse
+
+<div align="center">
 
 1. [Trin 1: Reconnaissance](#trin-1-reconnaissance)
 2. [Trin 2: Web Exploitation (SQL Injection)](#trin-2-web-exploitation-sql-injection)
@@ -82,6 +86,10 @@ Jeg nåede ikke at færdiggøre opgaven i sin helhed. I det sidste afsnit identi
 11. [Trin 11: Printserver adgang og yderligere discovery](#trin-11-printserver-adgang-og-yderligere-discovery)
 12. [WIP: Analyse af angrebsflader på router applikationer](#wip-analyse-af-angrebsflader-på-router-applikationer)
 13. [Læringspunkter](#læringspunkter)
+
+</div>
+
+<br>
 
 ---
 

