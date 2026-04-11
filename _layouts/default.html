@@ -20,9 +20,9 @@
       --text:       #ffffff;
       --text-dim:   #999;
       --border:     #222;
-      --nav-h:      64px;
+      --nav-h:      72px;
       --side-bar:   0px;
-      --sidebar-w:  280px;
+      --sidebar-w:  320px;
       --radius:     4px;
       --transition: 0.3s ease;
       --font-head:  'Rajdhani', sans-serif;
@@ -84,7 +84,7 @@
 
     .nav-logo {
       font-family: var(--font-mono);
-      font-size: 1rem;
+      font-size: 1.15rem;
       color: var(--text);
       letter-spacing: 2px;
       text-transform: uppercase;
@@ -98,7 +98,7 @@
 
     .nav-links a {
       color: var(--text);
-      font-size: 0.78rem;
+      font-size: 0.88rem;
       letter-spacing: 1.5px;
       text-transform: uppercase;
       font-family: var(--font-mono);
@@ -150,7 +150,7 @@
 
     .hero-eyebrow {
       font-family: var(--font-mono);
-      font-size: 0.75rem;
+      font-size: 0.9rem;
       letter-spacing: 4px;
       text-transform: uppercase;
       color: var(--accent);
@@ -160,7 +160,7 @@
 
     .writeup-hero h1 {
       font-family: var(--font-head);
-      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-size: clamp(3rem, 7vw, 5.5rem);
       font-weight: 700;
       line-height: 1.1;
       color: var(--text);
@@ -172,10 +172,10 @@
     .hero-badges { display: flex; flex-wrap: wrap; gap: 0.6rem; }
     .badge {
       font-family: var(--font-mono);
-      font-size: 0.7rem;
+      font-size: 0.85rem;
       letter-spacing: 1px;
       text-transform: none;
-      padding: 0.3rem 0.7rem;
+      padding: 0.4rem 0.9rem;
       background: var(--bg2);
       border: 1px solid var(--border);
       color: var(--text-dim);
@@ -204,7 +204,7 @@
 
     .sidebar-label {
       font-family: var(--font-mono);
-      font-size: 0.65rem;
+      font-size: 0.78rem;
       letter-spacing: 3px;
       color: var(--accent);
       text-transform: uppercase;
@@ -216,9 +216,9 @@
     .toc > li:hover { border-left-color: var(--accent); }
     .toc a {
       display: block;
-      padding: 0.45rem 0.9rem;
+      padding: 0.55rem 1rem;
       font-family: var(--font-body);
-      font-size: 0.82rem;
+      font-size: 0.95rem;
       color: var(--text-dim);
       line-height: 1.35;
       transition: color var(--transition);
@@ -227,20 +227,21 @@
     .toc-step {
       display: block;
       font-family: var(--font-mono);
-      font-size: 0.62rem;
+      font-size: 0.72rem;
       color: var(--accent);
       margin-bottom: 1px;
       letter-spacing: 1px;
     }
 
     /* Main content */
-    .writeup-content { padding: 4rem 4rem 6rem; min-width: 0; }
+    .writeup-content { padding: 5rem 6rem 6rem; min-width: 0; }
+    .writeup-content > * { max-width: 75ch; }
 
     .writeup-content h1 { display: none; }
 
     .writeup-content h2 {
       font-family: var(--font-head);
-      font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+      font-size: clamp(1.9rem, 3vw, 2.7rem);
       font-weight: 700;
       color: var(--text);
       letter-spacing: 0.5px;
@@ -253,7 +254,7 @@
 
     .writeup-content h3 {
       font-family: var(--font-head);
-      font-size: 1.15rem;
+      font-size: 1.35rem;
       font-weight: 600;
       color: var(--text);
       margin: 2rem 0 0.75rem;
@@ -262,7 +263,7 @@
     }
     .writeup-content h3::before { content: '> '; color: var(--accent); font-family: var(--font-mono); }
 
-    .writeup-content p { color: var(--text-dim); font-size: 0.95rem; margin-bottom: 1rem; }
+    .writeup-content p { color: var(--text-dim); font-size: 1.08rem; margin-bottom: 1rem; }
     .writeup-content strong { color: var(--text); font-weight: 600; }
     .writeup-content p a, .writeup-content li a { color: var(--accent); border-bottom: 1px solid var(--accent-dim); }
     .writeup-content p a:hover, .writeup-content li a:hover { border-color: var(--accent); color: #ff5252; }
@@ -273,12 +274,12 @@
       border: 1px solid #2a2a2a;
       border-left: 3px solid var(--accent);
       border-radius: var(--radius);
-      padding: 1.2rem 1.4rem;
-      margin: 1.2rem 0;
+      padding: 1.4rem 1.6rem;
+      margin: 1.4rem 0;
       overflow-x: auto;
       position: relative;
       font-family: var(--font-mono);
-      font-size: 0.82rem;
+      font-size: 0.95rem;
       line-height: 1.65;
       color: #ccc;
     }
@@ -298,23 +299,23 @@
     .writeup-content code { font-family: var(--font-mono); font-size: 0.85em; }
     .writeup-content p code, .writeup-content li code {
       background: var(--bg3); border: 1px solid var(--border);
-      padding: 1px 5px; color: var(--accent); font-size: 0.82rem; border-radius: 2px;
+      padding: 1px 6px; color: var(--accent); font-size: 0.95rem; border-radius: 2px;
     }
 
     .writeup-content blockquote {
       border-left: 3px solid var(--accent); background: var(--bg2);
-      padding: 1rem 1.2rem; margin: 1.2rem 0; color: var(--text-dim); font-size: 0.92rem;
+      padding: 1.1rem 1.4rem; margin: 1.4rem 0; color: var(--text-dim); font-size: 1.05rem;
     }
     .writeup-content blockquote strong { color: var(--accent); }
     .writeup-content blockquote p { margin: 0; }
 
     .writeup-content ul { list-style: none; padding: 0; margin: 0.75rem 0 1.2rem; }
-    .writeup-content ul li { padding: 0.2rem 0 0.2rem 1.2rem; position: relative; color: var(--text-dim); font-size: 0.93rem; }
-    .writeup-content ul li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); font-size: 0.65rem; top: 0.45rem; }
+    .writeup-content ul li { padding: 0.2rem 0 0.2rem 1.2rem; position: relative; color: var(--text-dim); font-size: 1.05rem; }
+    .writeup-content ul li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); font-size: 0.75rem; top: 0.45rem; }
     .writeup-content ul ul { margin: 0.3rem 0 0.3rem 1.2rem; }
-    .writeup-content ul ul li::before { content: '·'; font-size: 0.9rem; top: 0.25rem; }
+    .writeup-content ul ul li::before { content: '·'; font-size: 1rem; top: 0.25rem; }
     .writeup-content ol { padding-left: 1.4rem; margin: 0.75rem 0 1.2rem; }
-    .writeup-content ol li { color: var(--text-dim); font-size: 0.93rem; padding: 0.15rem 0; }
+    .writeup-content ol li { color: var(--text-dim); font-size: 1.05rem; padding: 0.15rem 0; }
 
     .writeup-content img { max-width: 100%; border: 1px solid var(--border); border-radius: var(--radius); margin: 1.2rem 0; }
     .writeup-content hr { border: none; border-top: 1px solid var(--border); margin: 3rem 0; }
