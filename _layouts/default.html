@@ -78,7 +78,43 @@
 
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb { background: #666; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #888; }
+
+    /* ── Scroll progress bar ── */
+    #scroll-progress {
+      position: fixed;
+      top: var(--nav-h);
+      left: 0;
+      width: 0%;
+      height: 3px;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent), 0 0 16px var(--accent-dim);
+      z-index: 999;
+      transition: width 0.08s linear;
+    }
+    #scroll-progress::after {
+      content: attr(data-pct);
+      position: absolute;
+      right: 0;
+      top: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 1px;
+      color: var(--accent);
+      background: var(--bg);
+      border: 1px solid var(--accent-dim);
+      padding: 1px 5px;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    #scroll-progress.show-pct::after { opacity: 1; }
+
+    /* ── TOC ACTIVE ── */
+    .toc a.active { color: var(--accent); }
+    .toc a.active::before { opacity: 1; }
+    .toc a.active::after { transform: scaleX(1); }
 
     /* ── NAV ── */
     nav {
@@ -373,6 +409,8 @@
   </style>
 </head>
 <body>
+
+  <div id="scroll-progress"></div>
 
   <nav>
     <div class="nav-logo"><span>[</span>Writeup<span>]</span><span class="nav-author"> — David Shmilowitz</span></div>
@@ -788,10 +826,50 @@ ffff4f4b = \xff\xffOK, peer name: 'saas'</code></pre></div>
   </footer>
 
   <script>
+    // ── Hamburger menu ──
     const ham = document.getElementById('hamburger');
     const nav = document.getElementById('navLinks');
     ham.addEventListener('click', () => { ham.classList.toggle('open'); nav.classList.toggle('open'); });
     nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { ham.classList.remove('open'); nav.classList.remove('open'); }));
+
+    // ── Scroll-spy TOC ──
+    const tocLinks = Array.from(document.querySelectorAll('.toc a'));
+    const navBar = document.querySelector('nav');
+    const headings = tocLinks
+      .map(a => document.getElementById(a.getAttribute('href').slice(1)))
+      .filter(Boolean);
+
+    function updateToc() {
+      if (!headings.length) return;
+      const offset = (navBar ? navBar.offsetHeight : 64) + 28;
+      let activeIdx = 0;
+      for (let i = 0; i < headings.length; i++) {
+        if (headings[i].getBoundingClientRect().top <= offset) activeIdx = i;
+      }
+      tocLinks.forEach((a, i) => a.classList.toggle('active', i === activeIdx));
+      tocLinks[activeIdx].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+
+    window.addEventListener('scroll', updateToc, { passive: true });
+    updateToc();
+
+    // ── Scroll progress bar ──
+    const progressBar = document.getElementById('scroll-progress');
+    let pctTimeout;
+
+    function updateProgress() {
+      const scrolled = window.scrollY;
+      const total = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = total > 0 ? Math.round((scrolled / total) * 100) : 0;
+      progressBar.style.width = pct + '%';
+      progressBar.setAttribute('data-pct', pct + '%');
+      progressBar.classList.add('show-pct');
+      clearTimeout(pctTimeout);
+      pctTimeout = setTimeout(() => progressBar.classList.remove('show-pct'), 1200);
+    }
+
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    updateProgress();
   </script>
 </body>
 </html>
